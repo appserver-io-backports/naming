@@ -7,13 +7,13 @@
 		"php" : ">=5.4.0",
 		"rhumsaa/uuid" : "~2.4",
 		"techdivision/properties" : "0.1.*",
-		"techdivision/persistencecontainerclient" : "0.6.*"
+		"techdivision/persistencecontainerclient" : "0.7.*"
 	},
 	"require-dev" : {
 		"phpunit/phpunit" : "3.7.*",
 		"appserver-io/build" : "0.1.*",
-        "techdivision/servlet" : "0.6.*",
-        "techdivision/application" : "0.2.*"
+		"techdivision/servlet" : "0.6.*",
+		"techdivision/application" : "0.2.*"
 	},
 	"autoload" : {
 		"psr-0" : {
