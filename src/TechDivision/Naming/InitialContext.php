@@ -25,12 +25,12 @@ use Rhumsaa\Uuid\Uuid;
 use TechDivision\Servlet\ServletRequest;
 use TechDivision\Properties\Properties;
 use TechDivision\Properties\PropertiesInterface;
+use TechDivision\PersistenceContainerProtocol\Session;
 use TechDivision\PersistenceContainerProtocol\BeanContext;
 use TechDivision\Application\Interfaces\ApplicationInterface;
 use TechDivision\PersistenceContainerClient\Connection;
 use TechDivision\PersistenceContainerClient\LocalConnectionFactory;
 use TechDivision\PersistenceContainerClient\RemoteConnectionFactory;
-use TechDivision\PersistenceContainerProtocol\Session;
 
 /**
  * Initial context implementation to lookup enterprise beans.
@@ -201,7 +201,7 @@ class InitialContext
         $resourceIdentifier = $this->prepareResourceIdentifier($name);
 
         // This MUST be a remote lookup to another application and the passed name MUST be a complete URL!
-        if ($resourceIdentifier->getScheme() === 'http') {
+        if ($resourceIdentifier->getScheme() === 'http' || $resourceIdentifier->getScheme() === 'https') {
             return $this->doRemoteLookup($resourceIdentifier);
         }
 

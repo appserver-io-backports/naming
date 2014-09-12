@@ -285,11 +285,11 @@ class ResourceIdentifier
     }
 
     /**
-     * Returns the application name from the URL.
+     * Returns the context name from the URL.
      *
-     * @return string|null The application name
+     * @return string|null The context name
      */
-    public function getApplicationName()
+    public function getContextName()
     {
         if ($filename = $this->getFilename()) {
             $filenameParts = explode('/', trim($filename, '/'));
@@ -318,7 +318,7 @@ class ResourceIdentifier
      *
      * @param string $url The URL to load the data from
      *
-     * @return \TechDivision\Example\Naming\ResourceIdentifier The instance
+     * @return void
      */
     public function populateFromUrl($url)
     {
@@ -332,7 +332,7 @@ class ResourceIdentifier
      *
      * @param \TechDivision\Properties\PropertiesInterface $properties The configuration properties
      *
-     * @return void
+     * @return \TechDivision\Naming\ResourceIdentifier The initialized instance
      */
     public static function createFromProperties(PropertiesInterface $properties)
     {
