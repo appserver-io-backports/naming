@@ -21,12 +21,16 @@
 
 namespace TechDivision\Naming;
 
+use Rhumsaa\Uuid\Uuid;
 use TechDivision\Servlet\ServletRequest;
 use TechDivision\Properties\Properties;
 use TechDivision\Properties\PropertiesInterface;
 use TechDivision\PersistenceContainerProtocol\BeanContext;
 use TechDivision\Application\Interfaces\ApplicationInterface;
-use TechDivision\PersistenceContainerClient\ConnectionFactory;
+use TechDivision\PersistenceContainerClient\Connection;
+use TechDivision\PersistenceContainerClient\LocalConnectionFactory;
+use TechDivision\PersistenceContainerClient\RemoteConnectionFactory;
+use TechDivision\PersistenceContainerProtocol\Session;
 
 /**
  * Initial context implementation to lookup enterprise beans.
@@ -61,7 +65,7 @@ class InitialContext
      * @var array
      */
     protected $defaultProperties = array(
-        'scheme' => 'http',
+        'scheme' => 'php',
         'user'   => 'appserver',
         'pass'   => 'appserver.i0',
         'host'   => '127.0.0.1',
@@ -269,34 +273,20 @@ class InitialContext
      *
      * @param \TechDivision\Naming\ResourceIdentifier $resourceIdentifier The resource identifier with the requested bean information
      *
-     * @return object The remote been instance
+     * @return object The been proxy instance
      */
     protected function doRemoteLookup(ResourceIdentifier $resourceIdentifier)
     {
 
         // initialize the connection
-        $connection = ConnectionFactory::createContextConnection($resourceIdentifier->getApplicationName());
-        $connection->setAddress($resourceIdentifier->getHost());
-        $connection->setPort($resourceIdentifier->getPort());
-        $connection->setTransport($resourceIdentifier->getScheme());
+        $connection = RemoteConnectionFactory::createContextConnection();
+        $connection->injectPort($resourceIdentifier->getPort());
+        $connection->injectAddress($resourceIdentifier->getHost());
+        $connection->injectTransport($resourceIdentifier->getScheme());
+        $connection->injectAppName($resourceIdentifier->getApplicationName());
 
-        // initialize the session
-        $session = $connection->createContextSession();
-
-        // check if we've a HTTP session-ID
-        $sessionId = null;
-        if ($this->getServletRequest() && $servletSession = $this->getServletRequest()->getSession()) {
-            $sessionId = $servletSession->getId(); // if yes, use it for connecting to the stateful session bean
-        }
-
-        // set the HTTP session-ID
-        $session->setSessionId($sessionId);
-
-        // load the class name from the resource identifier => that is the path information
-        $className = str_replace('/', '\\', $resourceIdentifier->getPathInfo());
-
-        // lookup and return the requested remote bean instance
-        return $session->createInitialContext()->lookup($className);
+        // finally try to lookup the bean
+        return $this->doLookup($resourceIdentifier, $connection);
     }
 
     /**
@@ -304,7 +294,7 @@ class InitialContext
      *
      * @param \TechDivision\Naming\ResourceIdentifier $resourceIdentifier The resource identifier with the requested bean information
      *
-     * @return object The local bean instance
+     * @return object The bean proxy instance
      */
     protected function doLocalLookup(ResourceIdentifier $resourceIdentifier)
     {
@@ -316,19 +306,43 @@ class InitialContext
             $application = $this->getApplication();
         }
 
+        // initialize the connection
+        $connection = LocalConnectionFactory::createContextConnection();
+        $connection->injectApplication($application);
+
+        // finally try to lookup the bean
+        return $this->doLookup($resourceIdentifier, $connection);
+    }
+
+    /**
+     * Finally this method does the lookup for the passed resource identifier
+     * using the also passed connection.
+     *
+     * @param \TechDivision\Naming\ResourceIdentifier             $resourceIdentifier The identifier for the requested bean
+     * @param \TechDivision\PersistenceContainerClient\Connection $connection         The connection we use for loading the bean
+     *
+     * @return object The been proxy instance
+     */
+    protected function doLookup(ResourceIdentifier $resourceIdentifier, Connection $connection)
+    {
+
+        // initialize the session
+        $session = $connection->createContextSession();
+
         // check if we've a HTTP session-ID
-        $sessionId = null;
         if ($this->getServletRequest() && $servletSession = $this->getServletRequest()->getSession()) {
             $sessionId = $servletSession->getId(); // if yes, use it for connecting to the stateful session bean
+        } else {
+            $sessionId = Uuid::uuid4()->__toString(); // simulate a unique session-ID
         }
+
+        // set the HTTP session-ID
+        $session->setSessionId($sessionId);
 
         // load the class name from the resource identifier => that is the path information
         $className = str_replace('/', '\\', $resourceIdentifier->getPathInfo());
 
-        // load the bean manager from the application context
-        $beanManager = $application->getManager(BeanContext::IDENTIFIER);
-
-        // lookup and return the requested local bean instance
-        return $beanManager->getResourceLocator()->lookup($beanManager, $className, $sessionId, array($application));
+        // lookup and return the requested remote bean instance
+        return $session->createInitialContext()->lookup($className);
     }
 }
