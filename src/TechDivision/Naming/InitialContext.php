@@ -25,12 +25,12 @@ use Rhumsaa\Uuid\Uuid;
 use TechDivision\Servlet\ServletRequest;
 use TechDivision\Properties\Properties;
 use TechDivision\Properties\PropertiesInterface;
+use TechDivision\PersistenceContainerProtocol\Session;
 use TechDivision\PersistenceContainerProtocol\BeanContext;
 use TechDivision\Application\Interfaces\ApplicationInterface;
 use TechDivision\PersistenceContainerClient\Connection;
 use TechDivision\PersistenceContainerClient\LocalConnectionFactory;
 use TechDivision\PersistenceContainerClient\RemoteConnectionFactory;
-use TechDivision\PersistenceContainerProtocol\Session;
 
 /**
  * Initial context implementation to lookup enterprise beans.
@@ -65,11 +65,13 @@ class InitialContext
      * @var array
      */
     protected $defaultProperties = array(
-        'scheme' => 'php',
-        'user'   => 'appserver',
-        'pass'   => 'appserver.i0',
-        'host'   => '127.0.0.1',
-        'port'   => '8585'
+        'scheme'    => 'php',
+        'user'      => 'appserver',
+        'pass'      => 'appserver.i0',
+        'host'      => '127.0.0.1',
+        'port'      => '8585',
+        'indexFile' => 'index.pc',
+        'interface' => EnterpriseBeanResourceIdentifier::LOCAL_INTERFACE
     );
 
     /**
@@ -165,19 +167,7 @@ class InitialContext
      *
      * Example URL for loading a local instance of the UserProcessor session bean:
      *
-     * php://user:password@127.0.0.1:9080/example/index.pc/TechDivision/Example/Services/UserProcessor?SESSID=sadf8dafs879sdfsad
-     *
-     * parse_url() => Output is:
-     * Array
-     * (
-     *     [scheme] => http
-     *     [host]   => 127.0.0.1
-     *     [port]   => 9080
-     *     [user]   => user
-     *     [pass]   => password
-     *     [path]   => /example/index.pc/TechDivision/Example/Services/UserProcessor
-     *     [query]  => SESSID=sadf8dafs879sdfsad
-     * )
+     * php:app/UserProcessor/local
      *
      * @param string $name The name of the requested enterprise bean
      *
@@ -201,13 +191,13 @@ class InitialContext
         $resourceIdentifier = $this->prepareResourceIdentifier($name);
 
         // This MUST be a remote lookup to another application and the passed name MUST be a complete URL!
-        if ($resourceIdentifier->getScheme() === 'http') {
+        if ($resourceIdentifier->isRemote()) {
             return $this->doRemoteLookup($resourceIdentifier);
         }
 
         // This MUST be a local lookup to this application, the passed name CAN either be the bean class name
         // only or the complete path including application name and script file name => index.pc for example!
-        if ($resourceIdentifier->getScheme() === 'php') {
+        if ($resourceIdentifier->isLocal()) {
             return $this->doLocalLookup($resourceIdentifier);
         }
 
@@ -231,37 +221,7 @@ class InitialContext
         $properties = $this->getProperties();
 
         // initialize the resource identifier from the passed resource
-        $resourceIdentifier = ResourceIdentifier::createFromProperties($properties);
-
-        // first check if the application name and dummy index file are available
-        if (!preg_match('/^http|php:\\/\\/.*/', $resourceName)) {
-
-            // use the application context from the servlet request
-            if ($this->getServletRequest() && $this->getServletRequest()->getContext()) {
-                $application = $this->getServletRequest()->getContext();
-            } else {
-                $application = $this->getApplication();
-            }
-
-            // we need an application context for a local loolup
-            if ($application == null) {
-                throw new NamingException(sprintf('Can\'t find application context for local lookup on %s', $resourceName));
-            }
-
-            // prepare the resource name with application and dummy index file
-            $resourceName = sprintf(
-                '%s://%s:%s@%s:%d/%s/index.pc/%s',
-                $properties->getProperty('scheme'),
-                $properties->getProperty('user'),
-                $properties->getProperty('pass'),
-                $properties->getProperty('host'),
-                $properties->getProperty('port'),
-                $application->getName(),
-                ltrim(str_replace('\\', '/', $resourceName), '/')
-            );
-        }
-
-        // if yes, we've a valid path and can initialize the resource identifier
+        $resourceIdentifier = EnterpriseBeanResourceIdentifier::createFromProperties($properties);
         $resourceIdentifier->populateFromUrl($resourceName);
 
         // return the initialized resource identifier
@@ -283,7 +243,7 @@ class InitialContext
         $connection->injectPort($resourceIdentifier->getPort());
         $connection->injectAddress($resourceIdentifier->getHost());
         $connection->injectTransport($resourceIdentifier->getScheme());
-        $connection->injectAppName($resourceIdentifier->getApplicationName());
+        $connection->injectAppName($resourceIdentifier->getContextName());
 
         // finally try to lookup the bean
         return $this->doLookup($resourceIdentifier, $connection);
@@ -340,7 +300,7 @@ class InitialContext
         $session->setSessionId($sessionId);
 
         // load the class name from the resource identifier => that is the path information
-        $className = str_replace('/', '\\', $resourceIdentifier->getPathInfo());
+        $className = $resourceIdentifier->getClassName();
 
         // lookup and return the requested remote bean instance
         return $session->createInitialContext()->lookup($className);

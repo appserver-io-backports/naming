@@ -79,7 +79,7 @@ class ResourceIdentifierTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($this->resourceIdentifier->getPath(), '/example/index.pc/TechDivision/Example/Services/UserProcessor');
         $this->assertSame($this->resourceIdentifier->getQuery(), 'SESSID=sadf8dafs879sdfsad');
         $this->assertSame($this->resourceIdentifier->getFilename(), '/example/index.pc');
-        $this->assertSame($this->resourceIdentifier->getApplicationName(), 'example');
+        $this->assertSame($this->resourceIdentifier->getContextName(), 'example');
         $this->assertSame($this->resourceIdentifier->getPathInfo(), '/TechDivision/Example/Services/UserProcessor');
     }
 }
