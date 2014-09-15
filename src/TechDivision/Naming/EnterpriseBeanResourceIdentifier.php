@@ -148,7 +148,7 @@ class EnterpriseBeanResourceIdentifier extends ResourceIdentifier
     /**
      * Sets the enterprise beans class name.
      *
-     * @param string $contextName The enterprise bean class name
+     * @param string $className The enterprise bean class name
      *
      * @return void
      */
@@ -170,7 +170,7 @@ class EnterpriseBeanResourceIdentifier extends ResourceIdentifier
     /**
      * Sets the name of the interface.
      *
-     * @param string $indexFile The name of the interface
+     * @param string $interface The name of the interface
      *
      * @return void
      */
