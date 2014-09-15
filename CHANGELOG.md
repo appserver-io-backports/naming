@@ -1,3 +1,13 @@
+# Version 0.1.2
+
+## Bugfixes
+
+* None
+
+## Features
+
+* Switching to from ResourceIdentifier => EnterpriseBeanResourceIdentifier for InitialContext::lookup method
+
 # Version 0.1.1
 
 ## Bugfixes

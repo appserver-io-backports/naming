@@ -38,6 +38,20 @@ class EnterpriseBeanResourceIdentifier extends ResourceIdentifier
 {
 
     /**
+     * The key for the local business interface.
+     *
+     * @var string
+     */
+    const LOCAL_INTERFACE = 'local';
+
+    /**
+     * The key for the remote business interface.
+     *
+     * @var string
+     */
+    const REMOTE_INTERFACE = 'remote';
+
+    /**
      * Identifier for property name 'contextName'.
      *
      * @var string
@@ -173,6 +187,26 @@ class EnterpriseBeanResourceIdentifier extends ResourceIdentifier
     public function getInterface()
     {
         return $this->getValue(EnterpriseBeanResourceIdentifier::PROPERTY_INTERFACE);
+    }
+
+    /**
+     * Queries whether the resource identifier requests a local interface or not.
+     *
+     * @return boolean TRUE if resource identifier requests a local interface
+     */
+    public function isLocal()
+    {
+        return $this->getInterface() === EnterpriseBeanResourceIdentifier::LOCAL_INTERFACE;
+    }
+
+    /**
+     * Queries whether the resource identifier requests a remote interface or not.
+     *
+     * @return boolean TRUE if resource identifier requests a remote interface
+     */
+    public function isRemote()
+    {
+        return $this->getInterface() === EnterpriseBeanResourceIdentifier::REMOTE_INTERFACE;
     }
 
     /**
