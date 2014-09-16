@@ -1,3 +1,13 @@
+# Version 0.1.3
+
+## Bugfixes
+
+* None
+
+## Features
+
+* Using nikic/phlexy as lexer for parsing JNDI style bean names in InitialContext::lookup() method
+
 # Version 0.1.2
 
 ## Bugfixes
@@ -6,7 +16,7 @@
 
 ## Features
 
-* Switching to from ResourceIdentifier => EnterpriseBeanResourceIdentifier for InitialContext::lookup method
+* Switching to from ResourceIdentifier => EnterpriseBeanResourceIdentifier for InitialContext::lookup() method
 
 # Version 0.1.1
 
