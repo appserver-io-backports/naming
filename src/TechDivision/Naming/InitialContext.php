@@ -22,6 +22,9 @@
 namespace TechDivision\Naming;
 
 use Rhumsaa\Uuid\Uuid;
+use Phlexy\Lexer;
+use Phlexy\LexerDataGenerator;
+use Phlexy\LexerFactory\Stateless\UsingPregReplace;
 use TechDivision\Servlet\ServletRequest;
 use TechDivision\Properties\Properties;
 use TechDivision\Properties\PropertiesInterface;
@@ -44,6 +47,28 @@ use TechDivision\PersistenceContainerClient\RemoteConnectionFactory;
  */
 class InitialContext
 {
+
+    const T_CLASS = 0;
+    const T_COLON = 1;
+    const T_SCHEME = 2;
+    const T_APPLICATION_SCOPE = 3;
+    const T_GLOBAL_SCOPE = 4;
+    const T_SEPARATOR = 5;
+    const T_INTERFACE = 6;
+
+    /**
+     * The configuration properties for this context.
+     *
+     * @var \TechDivision\Properties\PropertiesInterface
+     */
+    protected $properties;
+
+    /**
+     * The lexer used to parse the JNDI style bean names.
+     *
+     * @param \Phlexy\Lexer $lexer the lexer instance
+     */
+    protected $lexer;
 
     /**
      * The application instance the context is bound to.
@@ -70,6 +95,7 @@ class InitialContext
         'pass'      => 'appserver.i0',
         'host'      => '127.0.0.1',
         'port'      => '8585',
+        'scope'     => 'app',
         'indexFile' => 'index.pc',
         'interface' => EnterpriseBeanResourceIdentifier::LOCAL_INTERFACE
     );
@@ -94,6 +120,24 @@ class InitialContext
 
         // inject the properties
         $this->injectProperties($properties);
+
+        // create a factory for the lexer we use to parse the JNDI style bean names
+        $factory = new UsingPregReplace(new LexerDataGenerator);
+
+        // create the lexer instance and inject it
+        $this->injectLexer(
+            $factory->createLexer(
+                array(
+                    'php'           => InitialContext::T_SCHEME,
+                    'global\/(\w+)' => InitialContext::T_GLOBAL_SCOPE,
+                    'app'           => InitialContext::T_APPLICATION_SCOPE,
+                    '\:'            => InitialContext::T_COLON,
+                    '\/'            => InitialContext::T_SEPARATOR,
+                    'local|remote'  => InitialContext::T_INTERFACE,
+                    '\w+'           => InitialContext::T_CLASS
+                )
+            )
+        );
     }
 
     /**
@@ -106,6 +150,18 @@ class InitialContext
     public function injectProperties(PropertiesInterface $properties)
     {
         $this->properties = $properties;
+    }
+
+    /**
+     * The lexer used to parse the JNDI style bean names.
+     *
+     * @param \Phlexy\Lexer $lexer the lexer instance
+     *
+     * @return void
+     */
+    public function injectLexer(Lexer $lexer)
+    {
+        $this->lexer = $lexer;
     }
 
     /**
@@ -140,6 +196,16 @@ class InitialContext
     public function getProperties()
     {
         return $this->properties;
+    }
+
+    /**
+     * Returns the lexer used to parse the JNDI style bean names.
+     *
+     * @return \Phlexy\Lexer The lexer instance
+     */
+    public function getLexer()
+    {
+        return $this->lexer;
     }
 
     /**
@@ -214,18 +280,40 @@ class InitialContext
      * @return \TechDivision\Example\Naming\ResourceIdentifier The initialized resource identifier
      * @throws \TechDivision\Example\Naming\NamingException Is thrown if we can't find the necessary application context
      */
-    protected function prepareResourceIdentifier($resourceName)
+    public function prepareResourceIdentifier($resourceName)
     {
 
         // load the URL properties
-        $properties = $this->getProperties();
+        $properties = clone $this->getProperties();
+
+        // lex the passed resource name
+        foreach ($this->getLexer()->lex($resourceName) as $token) {
+
+            switch ($token[0]) { // check the found type
+
+                case InitialContext::T_SCHEME: // we found a scheme, e. g. php
+                    $properties->setProperty('scheme', $token[2]);
+                    break;
+
+                case InitialContext::T_INTERFACE: // we found a interface, e. g. local
+                    $properties->setProperty('interface', $token[2]);
+                    break;
+
+                case InitialContext::T_CLASS: // we found the class name, e. g. MyProcessor
+                    $properties->setProperty('className', $token[2]);
+                    break;
+
+                case InitialContext::T_GLOBAL_SCOPE: // we found the scope, e. g. app or global
+                    $properties->setProperty('contextName', current($token[3]));
+                    break;
+
+                default: // do nothing with the other tokens : and /
+                    break;
+            }
+        }
 
         // initialize the resource identifier from the passed resource
-        $resourceIdentifier = EnterpriseBeanResourceIdentifier::createFromProperties($properties);
-        $resourceIdentifier->populateFromUrl($resourceName);
-
-        // return the initialized resource identifier
-        return $resourceIdentifier;
+        return EnterpriseBeanResourceIdentifier::createFromProperties($properties);
     }
 
     /**

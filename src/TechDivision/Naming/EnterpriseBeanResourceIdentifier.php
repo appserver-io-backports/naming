@@ -210,58 +210,6 @@ class EnterpriseBeanResourceIdentifier extends ResourceIdentifier
     }
 
     /**
-     * Creates a new resource identifer instance with the data extracted from the passed URL.
-     *
-     * Possible URL's we can read from are:
-     *
-     * => /^php\:global\/(?P<applicationName>\w+)\/(?P<className>\w+)(\/(?P<interface>remote|local))?/
-     *
-     * - php:global/example/UserProcessor/remote   => specified application, remote interface
-     * - php:global/example/UserProcessor/local    => specified application, local interface
-     * - php:global/example/UserProcessor          => specified application, if only one interface has been defined
-     *
-     * => /^php\:app\/(?P<className>\w+)(\/(?P<interface>remote|local))?/
-     *
-     * - php:app/UserProcessor/remote              => actual application, remote interface
-     * - php:app/UserProcessor/local               => actual application, local interface
-     * - php:app/UserProcessor                     => actual application, if only one interface has been defined
-     *
-     * @param string $url The URL to load the data from
-     *
-     * @return void
-     * @throws \TechDivision\Naming\NamingException Is thrown if the passed URL is not a valid resource identifier
-     */
-    public function populateFromUrl($url)
-    {
-
-        // array preg_match will add the matches to
-        $values = array();
-
-        // try to match a app URL
-        if (preg_match('/^php\:app\/(?P<className>\w+)(\/(?P<interface>remote|local))?/', $url, $values)) {
-            foreach ($this->getSupportedMembers() as $memberName) {
-                if (isset ($values[$memberName])) {
-                    $this->setValue($memberName, $values[$memberName]);
-                }
-            }
-            return;
-        }
-
-        // try to match a global URL
-        if (preg_match('/^php\:global\/(?P<contextName>\w+)\/(?P<className>\\w+)(\/(?P<interface>remote|local))?/', $url, $values)) {
-            foreach ($this->getSupportedMembers() as $memberName) {
-                if (isset ($values[$memberName])) {
-                    $this->setValue($memberName, $values[$memberName]);
-                }
-            }
-            return;
-        }
-
-        // throw an exception if we can't macht the URL
-        throw new NamingException(sprintf('Can\'t match URL %s to a valid resource identifier', $url));
-    }
-
-    /**
      * create a new resource identifier with the URL parts from the passed properties.
      *
      * @param \TechDivision\Properties\PropertiesInterface $properties The configuration properties

@@ -6,6 +6,7 @@
 	"require" : {
 		"php" : ">=5.4.0",
 		"rhumsaa/uuid" : "~2.4",
+		"nikic/phlexy" : "dev-master",
 		"techdivision/properties" : "0.1.*",
 		"techdivision/persistencecontainerclient" : "0.7.*"
 	},
