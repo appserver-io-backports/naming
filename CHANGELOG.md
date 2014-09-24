@@ -1,3 +1,13 @@
+# Version 0.1.4
+
+## Bugfixes
+
+* Allow a minus char (-) in context name when parsing naming directory identifier passed to InitialContext::prepareResourceIdentifier() method
+
+## Features
+
+* None
+
 # Version 0.1.3
 
 ## Bugfixes
