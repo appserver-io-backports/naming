@@ -58,6 +58,13 @@ class InitialContextTest extends \PHPUnit_Framework_TestCase
     const CONTEXT_NAME = 'example';
 
     /**
+     * The default transport for remote interface handling.
+     *
+     * @var string
+     */
+    const TRANSPORT = 'http';
+
+    /**
      * The default context name with a minus for testing purposes.
      *
      * @var string
@@ -164,6 +171,7 @@ class InitialContextTest extends \PHPUnit_Framework_TestCase
         $defaultProperties = new Properties();
         $defaultProperties->setProperty('indexFile', InitialContextTest::INDEX_FILE);
         $defaultProperties->setProperty('contextName', InitialContextTest::CONTEXT_NAME);
+        $defaultProperties->setProperty('transport', InitialContextTest::TRANSPORT);
 
         // create the initial context initialized with the default properties
         $this->initialContext->injectProperties($defaultProperties);
@@ -175,6 +183,7 @@ class InitialContextTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(InitialContextTest::INDEX_FILE, $resourceIdentifier->getIndexFile());
         $this->assertSame(InitialContextTest::CLASS_NAME, $resourceIdentifier->getClassName());
         $this->assertSame(InitialContextTest::CONTEXT_NAME, $resourceIdentifier->getContextName());
+        $this->assertSame(InitialContextTest::TRANSPORT, $resourceIdentifier->getTransport());
         $this->assertSame(EnterpriseBeanResourceIdentifier::REMOTE_INTERFACE, $resourceIdentifier->getInterface());
     }
 

@@ -48,6 +48,11 @@ use TechDivision\PersistenceContainerClient\RemoteConnectionFactory;
 class InitialContext
 {
 
+    /**
+     * Lexer constants.
+     *
+     * @var integer
+     */
     const T_CLASS = 0;
     const T_COLON = 1;
     const T_SCHEME = 2;
@@ -90,6 +95,7 @@ class InitialContext
      * @var array
      */
     protected $defaultProperties = array(
+        'transport' => 'http',
         'scheme'    => 'php',
         'user'      => 'appserver',
         'pass'      => 'appserver.i0',
@@ -330,7 +336,7 @@ class InitialContext
         $connection = RemoteConnectionFactory::createContextConnection();
         $connection->injectPort($resourceIdentifier->getPort());
         $connection->injectAddress($resourceIdentifier->getHost());
-        $connection->injectTransport($resourceIdentifier->getScheme());
+        $connection->injectTransport($resourceIdentifier->getTransport());
         $connection->injectAppName($resourceIdentifier->getContextName());
 
         // finally try to lookup the bean

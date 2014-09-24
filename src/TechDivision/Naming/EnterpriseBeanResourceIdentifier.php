@@ -80,6 +80,13 @@ class EnterpriseBeanResourceIdentifier extends ResourceIdentifier
     const PROPERTY_INDEX_FILE = 'indexFile';
 
     /**
+     * Identifier for property name 'transport'.
+     *
+     * @var string
+     */
+    const PROPERTY_TRANSPORT = 'transport';
+
+    /**
      * The array with the members we want to parse from a URL.
      *
      * @var array
@@ -88,7 +95,8 @@ class EnterpriseBeanResourceIdentifier extends ResourceIdentifier
         EnterpriseBeanResourceIdentifier::PROPERTY_CONTEXT_NAME,
         EnterpriseBeanResourceIdentifier::PROPERTY_CLASS_NAME,
         EnterpriseBeanResourceIdentifier::PROPERTY_INDEX_FILE,
-        EnterpriseBeanResourceIdentifier::PROPERTY_INTERFACE
+        EnterpriseBeanResourceIdentifier::PROPERTY_INTERFACE,
+        EnterpriseBeanResourceIdentifier::PROPERTY_TRANSPORT
     );
 
     /**
@@ -207,6 +215,28 @@ class EnterpriseBeanResourceIdentifier extends ResourceIdentifier
     public function isRemote()
     {
         return $this->getInterface() === EnterpriseBeanResourceIdentifier::REMOTE_INTERFACE;
+    }
+
+    /**
+     * Sets the transport protocol for remote interface handling.
+     *
+     * @param string $transport The transport protocol for remote interface handling
+     *
+     * @return void
+     */
+    public function setTransport($transport)
+    {
+        $this->setValue(EnterpriseBeanResourceIdentifier::PROPERTY_TRANSPORT, $transport);
+    }
+
+    /**
+     * Returns the transport protocol for remote interface handling.
+     *
+     * @return string|null The transport protocol for remote interface handling
+     */
+    public function getTransport()
+    {
+        return $this->getValue(EnterpriseBeanResourceIdentifier::PROPERTY_TRANSPORT);
     }
 
     /**
