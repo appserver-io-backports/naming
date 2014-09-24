@@ -128,13 +128,13 @@ class InitialContext
         $this->injectLexer(
             $factory->createLexer(
                 array(
-                    'php'           => InitialContext::T_SCHEME,
-                    'global\/(\w+)' => InitialContext::T_GLOBAL_SCOPE,
-                    'app'           => InitialContext::T_APPLICATION_SCOPE,
-                    '\:'            => InitialContext::T_COLON,
-                    '\/'            => InitialContext::T_SEPARATOR,
-                    'local|remote'  => InitialContext::T_INTERFACE,
-                    '\w+'           => InitialContext::T_CLASS
+                    'php'                      => InitialContext::T_SCHEME,
+                    'global\/([a-zA-Z0-9_-]+)' => InitialContext::T_GLOBAL_SCOPE,
+                    'app'                      => InitialContext::T_APPLICATION_SCOPE,
+                    '\:'                       => InitialContext::T_COLON,
+                    '\/'                       => InitialContext::T_SEPARATOR,
+                    'local|remote'             => InitialContext::T_INTERFACE,
+                    '\w+'                      => InitialContext::T_CLASS
                 )
             )
         );

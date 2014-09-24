@@ -58,6 +58,13 @@ class InitialContextTest extends \PHPUnit_Framework_TestCase
     const CONTEXT_NAME = 'example';
 
     /**
+     * The default context name with a minus for testing purposes.
+     *
+     * @var string
+     */
+    const CONTEXT_NAME_WITH_MINUS = 'example-test';
+
+    /**
      * The class name only.
      *
      * @var string
@@ -84,6 +91,13 @@ class InitialContextTest extends \PHPUnit_Framework_TestCase
      * @var string
      */
     const IDENTIFIER_GLOBAL_REMOTE = 'php:global/example/UserProcessor/remote';
+
+    /**
+     * Specifys application, remote interface with a minus in application name.
+     *
+     * @var string
+     */
+    const IDENTIFIER_GLOBAL_REMOTE_WITH_MINUS = 'php:global/example-test/UserProcessor/remote';
 
     /**
      * Specifys application, local interface.
@@ -237,6 +251,25 @@ class InitialContextTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(InitialContextTest::INDEX_FILE, $resourceIdentifier->getIndexFile());
         $this->assertSame(InitialContextTest::CLASS_NAME, $resourceIdentifier->getClassName());
         $this->assertSame(InitialContextTest::CONTEXT_NAME, $resourceIdentifier->getContextName());
+        $this->assertSame(EnterpriseBeanResourceIdentifier::REMOTE_INTERFACE, $resourceIdentifier->getInterface());
+    }
+
+    /**
+     * Checks if the resource identifier will be initialized propertly
+     * from a URL with global scope and remote interface.
+     *
+     * @return void
+     */
+    public function testPopulateGlobalScopeWithRemoteInterfaceAndMinusInApplicationName()
+    {
+
+        // populate the identifier with the data of the passed URL
+        $resourceIdentifier = $this->initialContext->prepareResourceIdentifier(InitialContextTest::IDENTIFIER_GLOBAL_REMOTE_WITH_MINUS);
+
+        // check the data from the resource identifier
+        $this->assertSame(InitialContextTest::INDEX_FILE, $resourceIdentifier->getIndexFile());
+        $this->assertSame(InitialContextTest::CLASS_NAME, $resourceIdentifier->getClassName());
+        $this->assertSame(InitialContextTest::CONTEXT_NAME_WITH_MINUS, $resourceIdentifier->getContextName());
         $this->assertSame(EnterpriseBeanResourceIdentifier::REMOTE_INTERFACE, $resourceIdentifier->getInterface());
     }
 
