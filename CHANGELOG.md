@@ -1,3 +1,13 @@
+# Version 0.1.5
+
+## Bugfixes
+
+* Allow specification of default transport protocol for remote lookup handling => defaults to HTTP now
+
+## Features
+
+* None
+
 # Version 0.1.4
 
 ## Bugfixes
