@@ -1,3 +1,13 @@
+# Version 0.1.6
+
+## Bugfixes
+
+* None
+
+## Features
+
+* Add NamingDirectory and NamingDirectoryInterface
+
 # Version 0.1.5
 
 ## Bugfixes
