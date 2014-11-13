@@ -39,9 +39,9 @@ interface NamingDirectoryInterface extends StorageInterface
     /**
      * Binds the passed instance with the name to the naming directory.
      *
-     * @param string $name     The name to bind the object with
-     * @param object $instance The object instance to bind
-     * @param array  $args     The array with the arguments
+     * @param string $name  The name to bind the object with
+     * @param object $value The object instance to bind
+     * @param array  $args  The array with the arguments
      *
      * @return void
      */
