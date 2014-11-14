@@ -241,12 +241,13 @@ class InitialContext
      *
      * php:app/UserProcessor/local
      *
-     * @param string $name The name of the requested enterprise bean
+     * @param string $name      The name of the requested enterprise bean
+     * @param string $sessionId The session-ID, necessary for lookup stateful session beans
      *
      * @return object The requested enterprise bean instance
      * @throws \TechDivision\Example\Naming\NamingException Is thrown if we can't lookup the enterprise bean with the passed identifier
      */
-    public function lookup($name)
+    public function lookup($name, $sessionId = null)
     {
 
         // at least we need a resource identifier
@@ -264,13 +265,13 @@ class InitialContext
 
         // This MUST be a remote lookup to another application and the passed name MUST be a complete URL!
         if ($resourceIdentifier->isRemote()) {
-            return $this->doRemoteLookup($resourceIdentifier);
+            return $this->doRemoteLookup($resourceIdentifier, $sessionId);
         }
 
         // This MUST be a local lookup to this application, the passed name CAN either be the bean class name
         // only or the complete path including application name and script file name => index.pc for example!
         if ($resourceIdentifier->isLocal()) {
-            return $this->doLocalLookup($resourceIdentifier);
+            return $this->doLocalLookup($resourceIdentifier, $sessionId);
         }
 
         // throw an exception if we can't lookup the bean
@@ -326,10 +327,11 @@ class InitialContext
      * Makes a remote lookup for the URL containing the information of the requested bean.
      *
      * @param \TechDivision\Naming\ResourceIdentifier $resourceIdentifier The resource identifier with the requested bean information
+     * @param string                                  $sessionId          The session-ID, necessary for lookup stateful session beans
      *
      * @return object The been proxy instance
      */
-    protected function doRemoteLookup(ResourceIdentifier $resourceIdentifier)
+    protected function doRemoteLookup(ResourceIdentifier $resourceIdentifier, $sessionId = null)
     {
 
         // initialize the connection
@@ -340,17 +342,18 @@ class InitialContext
         $connection->injectAppName($resourceIdentifier->getContextName());
 
         // finally try to lookup the bean
-        return $this->doLookup($resourceIdentifier, $connection);
+        return $this->doLookup($resourceIdentifier, $connection, $sessionId);
     }
 
     /**
      * Makes a local lookup for the bean with the passed class name.
      *
      * @param \TechDivision\Naming\ResourceIdentifier $resourceIdentifier The resource identifier with the requested bean information
+     * @param string                                  $sessionId          The session-ID, necessary for lookup stateful session beans
      *
      * @return object The bean proxy instance
      */
-    protected function doLocalLookup(ResourceIdentifier $resourceIdentifier)
+    protected function doLocalLookup(ResourceIdentifier $resourceIdentifier, $sessionId = null)
     {
 
         // use the application context from the servlet request
@@ -365,7 +368,7 @@ class InitialContext
         $connection->injectApplication($application);
 
         // finally try to lookup the bean
-        return $this->doLookup($resourceIdentifier, $connection);
+        return $this->doLookup($resourceIdentifier, $connection, $sessionId);
     }
 
     /**
@@ -374,20 +377,23 @@ class InitialContext
      *
      * @param \TechDivision\Naming\ResourceIdentifier             $resourceIdentifier The identifier for the requested bean
      * @param \TechDivision\PersistenceContainerClient\Connection $connection         The connection we use for loading the bean
+     * @param string                                              $sessionId          The session-ID, necessary for lookup stateful session beans
      *
      * @return object The been proxy instance
      */
-    protected function doLookup(ResourceIdentifier $resourceIdentifier, Connection $connection)
+    protected function doLookup(ResourceIdentifier $resourceIdentifier, Connection $connection, $sessionId = null)
     {
 
         // initialize the session
         $session = $connection->createContextSession();
 
         // check if we've a HTTP session-ID
-        if ($this->getServletRequest() && $servletSession = $this->getServletRequest()->getSession()) {
+        if ($sessionId == null && $this->getServletRequest() && $servletSession = $this->getServletRequest()->getSession()) {
             $sessionId = $servletSession->getId(); // if yes, use it for connecting to the stateful session bean
-        } else {
+        } elseif ($sessionId == null) {
             $sessionId = Uuid::uuid4()->__toString(); // simulate a unique session-ID
+        } else {
+            // do nothing, because a session-ID has been passed
         }
 
         // set the HTTP session-ID
