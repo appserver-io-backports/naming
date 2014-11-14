@@ -1,3 +1,13 @@
+# Version 0.1.7
+
+## Bugfixes
+
+* None
+
+## Features
+
+* Add session-ID, necessary for lookup stateful session beans SFBs, to lookup() and sibling methods
+
 # Version 0.1.6
 
 ## Bugfixes
