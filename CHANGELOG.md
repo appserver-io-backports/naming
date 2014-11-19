@@ -1,3 +1,13 @@
+# Version 0.1.8
+
+## Bugfixes
+
+* None
+
+## Features
+
+* Enhance NamingDirectory functionality with recursive bind/search functionality
+
 # Version 0.1.7
 
 ## Bugfixes
