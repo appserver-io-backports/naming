@@ -21,7 +21,7 @@
 
 namespace TechDivision\Naming;
 
-use TechDivision\Storage\StorageInterface;
+use TechDivision\Context\Context;
 
 /**
  * Interface for naming directory implementations.
@@ -33,8 +33,29 @@ use TechDivision\Storage\StorageInterface;
  * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link      https://github.com/techdivision/TechDivision_Naming
  */
-interface NamingDirectoryInterface extends StorageInterface
+interface NamingDirectoryInterface extends Context
 {
+
+    /**
+     * Returns the directory name.
+     *
+     * @return string The directory name
+     */
+    public function getName();
+
+    /**
+     * Returns the parend directory.
+     *
+     * @return \TechDivision\Naming\NamingDirectoryInterface
+     */
+    public function getParent();
+
+    /**
+     * Returns the scheme.
+     *
+     * @return string The scheme we want to use
+     */
+    public function getScheme();
 
     /**
      * Binds the passed instance with the name to the naming directory.
@@ -59,6 +80,7 @@ interface NamingDirectoryInterface extends StorageInterface
      */
     public function bindCallback($name, callable $callback, array $args = array());
 
+
     /**
      * Queries the naming directory for the requested name and returns the value
      * or invokes the binded callback.
@@ -67,6 +89,18 @@ interface NamingDirectoryInterface extends StorageInterface
      * @param array  $args The arguments to pass to the callback
      *
      * @return mixed The requested value
+     * @throws \TechDivision\Naming\NamingException Is thrown if the requested name can't be resolved in the directory
      */
     public function search($name, array $args = array());
+
+    /**
+     * Create and return a new naming subdirectory with the attributes
+     * of this one.
+     *
+     * @param string $name   The name of the new subdirectory
+     * @param array  $filter Array with filters that will be applied when copy the attributes
+     *
+     * @return \TechDivision\Naming\NamingDirectory The new naming subdirectory
+     */
+    public function createSubdirectory($name, array $filter = array());
 }
